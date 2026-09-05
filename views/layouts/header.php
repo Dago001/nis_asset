@@ -110,10 +110,6 @@ $isAuthPage = in_array($pageTitle, [
     <link rel="stylesheet" href="<?php echo BASE_URL; ?>/assets/css/fontawesome.min.css?v=6.0.0">
     <link rel="stylesheet" href="<?php echo BASE_URL; ?>/assets/css/leaflet.css?v=1.9.4">
     <link rel="stylesheet" href="<?php echo BASE_URL; ?>/assets/css/app.css?v=1.0.8">
-    <!-- Button colour defaults — loaded before page styles so a page's own
-         button colours still win, but variants a page forgets to colour get a
-         proper default instead of rendering as bare text. -->
-    <link rel="stylesheet" href="<?php echo BASE_URL; ?>/assets/css/buttons-base.css?v=1.0.0">
     <!-- Mobile / native-app layer — only affects phones & tablets (all rules are
          inside max-width media queries); loaded after app.css so it layers on top. -->
     <link rel="stylesheet" href="<?php echo BASE_URL; ?>/assets/css/mobile.css?v=1.0.0">

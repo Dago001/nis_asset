@@ -23,10 +23,6 @@ if (!class_exists('Session')) {
 <?php
 $isAuthPage = isset($title) && in_array($title, ['Login', 'Two-Factor Authentication', 'Verifying Location', 'Forgot Password', 'Reset Password', 'Unauthorized']);
 ?>
-<!-- Uniform button system — loaded here (after each page's own <style> block)
-     so it reliably normalises button sizing app-wide. Geometry only; colours
-     are left to each button's own variant. -->
-<link rel="stylesheet" href="<?php echo BASE_URL; ?>/assets/css/buttons.css?v=1.0.0">
 <?php if (!$isAuthPage): ?>
     <!-- Footer -->
     <footer class="footer" style="margin-top: auto; background: var(--surface, #F7FAF8); padding: 15px 0; border-top: 1px solid var(--border-color, #D7E3DC); width: 100%; clear: both;">

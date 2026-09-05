@@ -147,9 +147,41 @@
         width: 100% !important;
     }
 
-    /* NOTE: button sizing (touch targets, full-width CTAs, icon buttons) is
-       owned by assets/css/buttons.css so all button geometry lives in one
-       place. See that file's "TOUCH SIZING ON PHONES" section. */
+    /* ---- Buttons: large, rounded, thumb friendly ------------------------- */
+    .btn {
+        min-height: 44px;
+        border-radius: 10px !important;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+    }
+    .btn:active {
+        transform: scale(0.98);
+    }
+
+    /* Primary/action buttons in forms & headers go full width like an app CTA */
+    .form-actions .btn,
+    .form-buttons .btn,
+    .modal-footer .btn,
+    .header-actions .btn,
+    .btn-block {
+        flex: 1 1 100% !important;
+        width: 100% !important;
+    }
+    .form-actions,
+    .form-buttons {
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+    }
+
+    /* Icon-only round buttons stay square, don't stretch */
+    .btn-icon {
+        flex: 0 0 auto !important;
+        width: 40px !important;
+        min-width: 40px;
+        padding: 0 !important;
+    }
 
     /* ---- Data tables: horizontal swipe inside a rounded card ------------- */
     .asset-table,
