@@ -67,7 +67,14 @@ $isAuthPage = in_array($pageTitle, [
 <html lang="en" data-theme="<?php echo $defaultTheme; ?>">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, shrink-to-fit=no">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, shrink-to-fit=no, viewport-fit=cover">
+    <!-- Native mobile-app hints (installable / full-bleed / branded status bar) -->
+    <meta name="theme-color" content="#134617">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="NIS AMS">
+    <link rel="apple-touch-icon" href="<?php echo BASE_URL; ?>/assets/images/nis-logo.png">
     <meta name="csrf-token" content="<?php echo htmlspecialchars($csrfToken); ?>">
     <meta name="app-base" content="<?php echo htmlspecialchars(rtrim(BASE_URL, '/')); ?>">
     <title><?php echo htmlspecialchars($appName); ?> - <?php echo htmlspecialchars($pageTitle); ?></title>
@@ -103,6 +110,9 @@ $isAuthPage = in_array($pageTitle, [
     <link rel="stylesheet" href="<?php echo BASE_URL; ?>/assets/css/fontawesome.min.css?v=6.0.0">
     <link rel="stylesheet" href="<?php echo BASE_URL; ?>/assets/css/leaflet.css?v=1.9.4">
     <link rel="stylesheet" href="<?php echo BASE_URL; ?>/assets/css/app.css?v=1.0.8">
+    <!-- Mobile / native-app layer — only affects phones & tablets (all rules are
+         inside max-width media queries); loaded after app.css so it layers on top. -->
+    <link rel="stylesheet" href="<?php echo BASE_URL; ?>/assets/css/mobile.css?v=1.0.0">
     <?php if (isset($extra_css) && is_array($extra_css)): ?>
         <?php foreach ($extra_css as $css): ?>
             <link rel="stylesheet" href="<?php echo htmlspecialchars($css); ?>?v=1.0.5">
