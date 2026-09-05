@@ -94,6 +94,16 @@
         font-size: 13px;
     }
 
+    /* ---- Header: keep the logo and the "NIS AMS" title apart -------------- */
+    /* app.css collapses this gap to 0 on phones, leaving the logo touching the
+       title. Restore comfortable breathing room between them. */
+    .logo-title-container {
+        gap: 10px !important;
+    }
+    .header-logo {
+        margin-right: 2px !important;
+    }
+
     /* ---- Content gutters: edge-to-edge app feel --------------------------- */
     .main-content {
         padding-left: 12px !important;
