@@ -109,7 +109,7 @@ $isAuthPage = in_array($pageTitle, [
     <!-- Stylesheets (Loaded first for immediate visual paint) -->
     <link rel="stylesheet" href="<?php echo BASE_URL; ?>/assets/css/fontawesome.min.css?v=6.0.0">
     <link rel="stylesheet" href="<?php echo BASE_URL; ?>/assets/css/leaflet.css?v=1.9.4">
-    <link rel="stylesheet" href="<?php echo BASE_URL; ?>/assets/css/app.css?v=1.0.8">
+    <link rel="stylesheet" href="<?php echo BASE_URL; ?>/assets/css/app.css?v=1.0.9">
     <!-- Mobile / native-app layer — only affects phones & tablets (all rules are
          inside max-width media queries); loaded after app.css so it layers on top. -->
     <link rel="stylesheet" href="<?php echo BASE_URL; ?>/assets/css/mobile.css?v=1.0.0">

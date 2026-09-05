@@ -1235,7 +1235,9 @@ html, body {
     }
 
     .logo-title-container {
-        gap: 0 !important;
+        /* Space between the crest logo and the "NIS AMS" title on phones.
+           Was 0, which left the logo touching the title. */
+        gap: 12px !important;
     }
 
     .admin-profile-container {
