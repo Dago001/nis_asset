@@ -1,0 +1,45 @@
+# --------------------------------------------------------------------------
+# Uploaded documents: no script execution, no direct/unauthenticated access.
+# Every request is routed through ../../serve_document.php which enforces
+# authentication + per-record authorisation before streaming the file.
+# --------------------------------------------------------------------------
+
+# 1. Never execute anything in this tree as a script.
+<IfModule mod_php.c>
+    php_flag engine off
+</IfModule>
+<IfModule mod_php7.c>
+    php_flag engine off
+</IfModule>
+<IfModule mod_php8.c>
+    php_flag engine off
+</IfModule>
+<FilesMatch "\.(php[0-9]?|phtml|pht|phar|cgi|pl|py|jsp|asp|sh)$">
+    <IfModule mod_authz_core.c>
+        Require all denied
+    </IfModule>
+    <IfModule !mod_authz_core.c>
+        Order allow,deny
+        Deny from all
+    </IfModule>
+</FilesMatch>
+
+# 2. Route every file request through the authenticated gatekeeper.
+#    The "../../" is relative to this directory's URL path, so it resolves
+#    to <app-root>/serve_document.php regardless of the deploy sub-path.
+<IfModule mod_rewrite.c>
+    RewriteEngine On
+    RewriteCond %{REQUEST_URI} !/serve_document\.php$
+    RewriteRule ^(.*)$ ../../serve_document.php?doc=$1 [L,QSA]
+</IfModule>
+
+# 3. If mod_rewrite is unavailable, fail closed.
+<IfModule !mod_rewrite.c>
+    <IfModule mod_authz_core.c>
+        Require all denied
+    </IfModule>
+    <IfModule !mod_authz_core.c>
+        Order allow,deny
+        Deny from all
+    </IfModule>
+</IfModule>

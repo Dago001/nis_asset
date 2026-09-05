@@ -1,0 +1,890 @@
+<?php
+$title = 'Add Movable Asset';
+$active = 'movable';
+require_once __DIR__ . '/../layouts/header.php';
+require_once __DIR__ . '/../layouts/sidebar.php';
+
+$old = Session::get('old', []);
+$errors = Session::get('errors', []);
+Session::remove('old');
+Session::remove('errors');
+
+// Get all states for dropdown
+$states = Database::fetchAll("SELECT * FROM states ORDER BY state_name");
+if ($states === false) $states = [];
+
+// Get all zones for dropdown
+$zones = Database::fetchAll("SELECT * FROM zones ORDER BY zone_name");
+if ($zones === false) $zones = [];
+
+// Document types for the dropdown
+$documentTypes = [
+    'receipt' => 'Purchase Receipt',
+    'warranty' => 'Warranty Document',
+    'manual' => 'User Manual',
+    'photo' => 'Asset Photo',
+    'maintenance' => 'Maintenance Record',
+    'other' => 'Other Document'
+];
+?>
+
+<div class="container-fluid">
+    <!-- Page Header -->
+    <div class="page-header">
+        <div class="header-content">
+            <h1>
+                <i class="fas fa-plus-circle"></i>
+                Add New Movable Asset
+            </h1>
+            <p>Enter movable asset details</p>
+        </div>
+        <div class="header-actions">
+            <a href="<?php echo BASE_URL; ?>/movable" class="btn btn-secondary">
+                <i class="fas fa-arrow-left"></i> Back to List
+            </a>
+        </div>
+    </div>
+
+    <!-- Form -->
+    <div class="form-section">
+        <form method="POST" action="<?php echo BASE_URL; ?>/movable/store" enctype="multipart/form-data" id="movableForm">
+            <?php echo Security::csrfField(); ?>
+            
+            <!-- Basic Information -->
+            <div class="form-section-inner">
+                <div class="section-title">
+                    <h3><i class="fas fa-info-circle"></i> Basic Information</h3>
+                </div>
+                
+                <div class="form-row">
+                    <div class="form-group">
+                        <label class="required">Asset Type</label>
+                        <select name="asset_type" id="asset_type" required 
+                                class="form-control <?php echo isset($errors['asset_type']) ? 'error' : ''; ?>">
+                            <option value="">Select Asset Type</option>
+                            <option value="Furniture" <?php echo ($old['asset_type'] ?? '') == 'Furniture' ? 'selected' : ''; ?>>Furniture</option>
+                            <option value="Office Equipment" <?php echo ($old['asset_type'] ?? '') == 'Office Equipment' ? 'selected' : ''; ?>>Office Equipment</option>
+                            <option value="Machinery" <?php echo ($old['asset_type'] ?? '') == 'Machinery' ? 'selected' : ''; ?>>Machinery</option>
+                            <option value="Generator" <?php echo ($old['asset_type'] ?? '') == 'Generator' ? 'selected' : ''; ?>>Generator</option>
+                            <option value="Tools" <?php echo ($old['asset_type'] ?? '') == 'Tools' ? 'selected' : ''; ?>>Tools</option>
+                            <option value="Appliances" <?php echo ($old['asset_type'] ?? '') == 'Appliances' ? 'selected' : ''; ?>>Appliances</option>
+                            <option value="Other">Other</option>
+                        </select>
+                        <?php if (isset($errors['asset_type'])): ?>
+                            <small class="error-text"><?php echo $errors['asset_type']; ?></small>
+                        <?php endif; ?>
+                    </div>
+                    
+                    <div class="form-group" id="typeOtherWrapper" style="display: none;">
+                        <label>Specify Asset Type</label>
+                        <input type="text" name="asset_type_other" id="asset_type_other" class="form-control" 
+                               value="<?php echo Security::escape($old['asset_type_other'] ?? ''); ?>" placeholder="Enter asset type">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label class="required">Make / Model</label>
+                        <input type="text" name="make_model" value="<?php echo Security::escape($old['make_model'] ?? ''); ?>" 
+                               required maxlength="255" 
+                               class="form-control <?php echo isset($errors['make_model']) ? 'error' : ''; ?>"
+                               placeholder="e.g., HP LaserJet Pro M404dn">
+                        <?php if (isset($errors['make_model'])): ?>
+                            <small class="error-text"><?php echo $errors['make_model']; ?></small>
+                        <?php endif; ?>
+                    </div>
+                </div>
+                
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Serial Number</label>
+                        <input type="text" name="serial_number" value="<?php echo Security::escape($old['serial_number'] ?? ''); ?>" 
+                               maxlength="100" class="form-control" placeholder="Enter serial number if available">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label>Capacity / Specification</label>
+                        <textarea name="capacity_specification" rows="2" class="form-control" 
+                                  placeholder="e.g., 50 pages/min, A3 printing, etc."><?php echo Security::escape($old['capacity_specification'] ?? ''); ?></textarea>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Location Information -->
+            <div class="form-section-inner">
+                <div class="section-title">
+                    <h3><i class="fas fa-map-marker-alt"></i> Location Information</h3>
+                </div>
+                
+                <div class="form-row">
+                    <div class="form-group">
+                        <label class="required">State</label>
+                        <select name="state_id" id="state_id" required 
+                                class="form-control <?php echo isset($errors['state_id']) ? 'error' : ''; ?>">
+                            <option value="">Select State</option>
+                            <?php foreach ($states as $state): ?>
+                            <option value="<?php echo $state['id']; ?>" 
+                                    <?php echo ($old['state_id'] ?? '') == $state['id'] ? 'selected' : ''; ?>>
+                                <?php echo Security::escape($state['state_name']); ?>
+                            </option>
+                            <?php endforeach; ?>
+                        </select>
+                        <?php if (isset($errors['state_id'])): ?>
+                            <small class="error-text"><?php echo $errors['state_id']; ?></small>
+                        <?php endif; ?>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label class="required">Local Government Area (LGA)</label>
+                        <select name="lga_id" id="lga_id" required 
+                                class="form-control <?php echo isset($errors['lga_id']) ? 'error' : ''; ?>">
+                            <option value="">Select State First</option>
+                        </select>
+                        <?php if (isset($errors['lga_id'])): ?>
+                            <small class="error-text"><?php echo $errors['lga_id']; ?></small>
+                        <?php endif; ?>
+                    </div>
+                </div>
+                
+                <div class="form-row">
+                    <div class="form-group">
+                        <label class="required">Zone</label>
+                        <select name="zone_id" id="zone_id" required 
+                                class="form-control <?php echo isset($errors['zone_id']) ? 'error' : ''; ?>">
+                            <option value="">Select Zone</option>
+                            <?php foreach ($zones as $zone): ?>
+                            <option value="<?php echo $zone['id']; ?>" 
+                                    <?php echo ($old['zone_id'] ?? '') == $zone['id'] ? 'selected' : ''; ?>>
+                                <?php echo Security::escape($zone['zone_name']); ?>
+                            </option>
+                            <?php endforeach; ?>
+                        </select>
+                        <?php if (isset($errors['zone_id'])): ?>
+                            <small class="error-text"><?php echo $errors['zone_id']; ?></small>
+                        <?php endif; ?>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label class="required">Command / Formation</label>
+                        <select name="command_id" id="command_id" required 
+                                class="form-control <?php echo isset($errors['command_id']) ? 'error' : ''; ?>">
+                            <option value="">Select Zone First</option>
+                        </select>
+                        <?php if (isset($errors['command_id'])): ?>
+                            <small class="error-text"><?php echo $errors['command_id']; ?></small>
+                        <?php endif; ?>
+                    </div>
+                </div>
+                
+                <div class="form-group">
+                    <label>Specific Location / Room</label>
+                    <input type="text" name="current_location" value="<?php echo Security::escape($old['current_location'] ?? ''); ?>" 
+                           class="form-control" placeholder="e.g., Room 205, 2nd Floor">
+                </div>
+            </div>
+            
+            <!-- Custodian Information -->
+            <div class="form-section-inner">
+                <div class="section-title">
+                    <h3><i class="fas fa-user-tie"></i> Custodian Information</h3>
+                </div>
+                
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Custodian Name</label>
+                        <input type="text" name="custodian_name" value="<?php echo Security::escape($old['custodian_name'] ?? ''); ?>" 
+                               maxlength="255" class="form-control" placeholder="Full name of person in charge">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label>Custodian Rank</label>
+                        <select name="custodian_rank" class="form-control">
+                            <option value="">Select Rank</option>
+                            <?php foreach (getNisRanks() as $rank): ?>
+                                <option value="<?php echo htmlspecialchars($rank); ?>" <?php echo ($old['custodian_rank'] ?? '') === $rank ? 'selected' : ''; ?>>
+                                    <?php echo htmlspecialchars($rank); ?>
+                                </option>
+                            <?php endforeach; ?>
+                        </select>
+                    </div>
+                </div>
+                
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Custodian NIS Number</label>
+                        <input type="text" name="custodian_nis" value="<?php echo Security::escape($old['custodian_nis'] ?? ''); ?>"
+                               maxlength="20" inputmode="numeric" pattern="[0-9]*" title="Numbers only"
+                               oninput="this.value = this.value.replace(/[^0-9]/g, '')"
+                               class="form-control" placeholder="NIS number">
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Acquisition Details -->
+            <div class="form-section-inner">
+                <div class="section-title">
+                    <h3><i class="fas fa-file-invoice-dollar"></i> Acquisition Details</h3>
+                </div>
+                
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Purchase Date</label>
+                        <input type="date" name="purchase_date" value="<?php echo Security::escape($old['purchase_date'] ?? ''); ?>" 
+                               class="form-control" max="<?php echo date('Y-m-d'); ?>">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label>Purchase Value (₦)</label>
+                        <input type="number" step="0.01" name="purchase_value" value="<?php echo Security::escape($old['purchase_value'] ?? ''); ?>" 
+                               class="form-control" placeholder="Purchase amount">
+                    </div>
+                </div>
+                
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Current Value (₦)</label>
+                        <input type="number" step="0.01" name="current_value" value="<?php echo Security::escape($old['current_value'] ?? ''); ?>" 
+                               class="form-control" placeholder="Current depreciated value">
+                        <small class="form-hint">Leave blank to use purchase value</small>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label>Warranty Information</label>
+                        <textarea name="warranty_info" rows="2" class="form-control" 
+                                  placeholder="Warranty details, expiry, terms"><?php echo Security::escape($old['warranty_info'] ?? ''); ?></textarea>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Maintenance Schedule -->
+            <div class="form-section-inner">
+                <div class="section-title">
+                    <h3><i class="fas fa-tools"></i> Maintenance Schedule</h3>
+                </div>
+                
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Maintenance Schedule</label>
+                        <textarea name="maintenance_schedule" rows="2" class="form-control" 
+                                  placeholder="e.g., Quarterly, Annually, or specific instructions"><?php echo Security::escape($old['maintenance_schedule'] ?? ''); ?></textarea>
+                    </div>
+                </div>
+                
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Last Maintenance Date</label>
+                        <input type="date" name="last_maintenance_date" value="<?php echo Security::escape($old['last_maintenance_date'] ?? ''); ?>" 
+                               class="form-control" max="<?php echo date('Y-m-d'); ?>">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label>Next Maintenance Date</label>
+                        <input type="date" name="next_maintenance_date" value="<?php echo Security::escape($old['next_maintenance_date'] ?? ''); ?>" 
+                               class="form-control">
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Status & Remarks -->
+            <div class="form-section-inner">
+                <div class="section-title">
+                    <h3><i class="fas fa-clipboard-check"></i> Status & Remarks</h3>
+                </div>
+                
+                <div class="form-row">
+                    <div class="form-group">
+                        <label class="required">Condition Status</label>
+                        <select name="condition_status" id="condition_status" required 
+                                class="form-control <?php echo isset($errors['condition_status']) ? 'error' : ''; ?>">
+                            <option value="">Select Condition</option>
+                            <option value="Excellent" <?php echo ($old['condition_status'] ?? '') == 'Excellent' ? 'selected' : ''; ?>>Excellent</option>
+                            <option value="Good" <?php echo ($old['condition_status'] ?? '') == 'Good' ? 'selected' : ''; ?>>Good</option>
+                            <option value="Fair" <?php echo ($old['condition_status'] ?? '') == 'Fair' ? 'selected' : ''; ?>>Fair</option>
+                            <option value="Poor" <?php echo ($old['condition_status'] ?? '') == 'Poor' ? 'selected' : ''; ?>>Poor</option>
+                            <option value="Under Maintenance" <?php echo ($old['condition_status'] ?? '') == 'Under Maintenance' ? 'selected' : ''; ?>>Under Maintenance</option>
+                        </select>
+                        <?php if (isset($errors['condition_status'])): ?>
+                            <small class="error-text"><?php echo $errors['condition_status']; ?></small>
+                        <?php endif; ?>
+                    </div>
+                </div>
+                
+                <div class="form-group">
+                    <label>Remarks</label>
+                    <textarea name="remarks" rows="3" class="form-control" 
+                              placeholder="Any additional remarks about the asset"><?php echo Security::escape($old['remarks'] ?? ''); ?></textarea>
+                </div>
+            </div>
+            
+            <!-- Document Upload Section - Professional Redesign -->
+            <div class="form-section-inner">
+                <div class="section-title">
+                    <h3><i class="fas fa-file-upload"></i> Document Upload</h3>
+                    <span class="badge badge-info">Optional - Max 5MB per file</span>
+                </div>
+                
+                <div class="document-upload-container">
+                    <div class="document-types-grid" id="documentTypesContainer">
+                        <!-- Document type rows will be added here dynamically -->
+                    </div>
+                    
+                    <div class="document-actions">
+                        <button type="button" class="btn btn-outline-primary" id="addDocumentBtn">
+                            <i class="fas fa-plus-circle"></i> Add Another Document
+                        </button>
+                    </div>
+                    
+                    <div class="upload-info">
+                        <div class="info-item">
+                            <i class="fas fa-info-circle text-info"></i>
+                            <span>Allowed file types: PDF, JPG, PNG, DOC, DOCX</span>
+                        </div>
+                        <div class="info-item">
+                            <i class="fas fa-database text-warning"></i>
+                            <span>Maximum file size: 5MB per file</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Form Actions -->
+            <div class="form-actions">
+                <button type="submit" class="btn btn-success submit-btn">
+                    <i class="fas fa-save"></i> Save Movable Asset
+                </button>
+                <button type="button" class="btn btn-secondary" onclick="resetForm('movableForm')">
+                    <i class="fas fa-undo"></i> Reset Form
+                </button>
+                <a href="<?php echo BASE_URL; ?>/movable" class="btn btn-outline">
+                    <i class="fas fa-times"></i> Cancel
+                </a>
+            </div>
+        </form>
+    </div>
+</div>
+
+<style>
+/* Professional Document Upload Styles */
+.document-upload-container {
+    background: #f8fafc;
+    border-radius: 12px;
+    padding: 20px;
+    border: 1px solid #D7E3DC;
+    margin-top: 15px;
+}
+
+.document-types-grid {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+    margin-bottom: 20px;
+}
+
+.document-row {
+    display: grid;
+    grid-template-columns: 250px 1fr 40px;
+    gap: 15px;
+    align-items: center;
+    background: var(--surface);
+    padding: 15px;
+    border-radius: 8px;
+    border: 1px solid #D7E3DC;
+    transition: all 0.3s ease;
+    position: relative;
+}
+
+.document-row:hover {
+    border-color: #207027;
+    box-shadow: 0 2px 8px rgba(32, 112, 39, 0.1);
+}
+
+.document-type-select {
+    width: 100%;
+    padding: 10px 12px;
+    border: 1px solid #D7E3DC;
+    border-radius: 6px;
+    font-size: 0.95rem;
+    background: var(--surface);
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.document-type-select:hover,
+.document-type-select:focus {
+    border-color: #207027;
+    outline: none;
+    box-shadow: 0 0 0 3px rgba(32, 112, 39, 0.1);
+}
+
+.file-input-wrapper {
+    position: relative;
+    width: 100%;
+}
+
+.file-input-custom {
+    width: 100%;
+    padding: 10px 12px;
+    border: 1px dashed #D7E3DC;
+    border-radius: 6px;
+    background: #f8fafc;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    color: #64748b;
+}
+
+.file-input-custom:hover {
+    border-color: #207027;
+    background: #f0f9f4;
+    color: #207027;
+}
+
+.file-input-custom i {
+    font-size: 1.2rem;
+}
+
+.file-input-custom span {
+    flex: 1;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.file-input-element {
+    position: absolute;
+    left: 0;
+    top: 0;
+    opacity: 0;
+    width: 100%;
+    height: 100%;
+    cursor: pointer;
+}
+
+.remove-document-btn {
+    width: 40px;
+    height: 40px;
+    border-radius: 8px;
+    border: 1px solid #fee2e2;
+    background: #fef2f2;
+    color: #ef4444;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.remove-document-btn:hover {
+    background: #ef4444;
+    color: white;
+    border-color: #ef4444;
+}
+
+.remove-document-btn:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+    background: #f1f5f9;
+    color: #94a3b8;
+    border-color: #D7E3DC;
+}
+
+.document-actions {
+    display: flex;
+    justify-content: center;
+    margin: 15px 0;
+}
+
+.btn-outline-primary {
+    background: var(--surface);
+    border: 1px solid #207027;
+    color: #207027;
+    padding: 10px 20px;
+    border-radius: 6px;
+    font-size: 0.95rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.btn-outline-primary:hover {
+    background: #207027;
+    color: white;
+    transform: translateY(-1px);
+    box-shadow: 0 4px 8px rgba(32, 112, 39, 0.2);
+}
+
+.btn-outline-primary i {
+    font-size: 1rem;
+}
+
+.upload-info {
+    margin-top: 20px;
+    padding: 15px;
+    background: #f1f5f9;
+    border-radius: 8px;
+    display: flex;
+    gap: 20px;
+    flex-wrap: wrap;
+}
+
+.info-item {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 0.9rem;
+    color: #475569;
+}
+
+.info-item i {
+    font-size: 1rem;
+}
+
+/* Badge styles */
+.badge {
+    display: inline-block;
+    padding: 4px 12px;
+    border-radius: 20px;
+    font-size: 0.8rem;
+    font-weight: 500;
+}
+
+.badge-info {
+    background: #e0f2f1;
+    color: #00695c;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    .document-row {
+        grid-template-columns: 1fr;
+        gap: 10px;
+    }
+    
+    .remove-document-btn {
+        position: absolute;
+        top: 10px;
+        right: 10px;
+    }
+    
+    .upload-info {
+        flex-direction: column;
+        gap: 10px;
+    }
+}
+</style>
+
+<script>
+// Define base URL for API calls
+const baseUrl = '<?php echo BASE_URL; ?>';
+const documentTypes = <?php echo json_encode($documentTypes); ?>;
+
+let documentCount = 0;
+
+// Add debug function like in land form
+function debug(message, data = null) {
+    console.log(message, data);
+}
+
+document.addEventListener('DOMContentLoaded', function() {
+    debug('Page loaded');
+    debug('Base URL:', baseUrl);
+    
+    // Add first document row by default
+    addDocumentRow();
+    
+    // Asset type other field
+    const typeSelect = document.getElementById('asset_type');
+    const typeWrapper = document.getElementById('typeOtherWrapper');
+    const typeOther = document.getElementById('asset_type_other');
+    
+    if (typeSelect) {
+        typeSelect.addEventListener('change', function() {
+            if (this.value === 'Other') {
+                typeWrapper.style.display = 'block';
+                typeOther.required = true;
+            } else {
+                typeWrapper.style.display = 'none';
+                typeOther.required = false;
+                typeOther.value = '';
+            }
+        });
+        
+        <?php if (($old['asset_type'] ?? '') === 'Other'): ?>
+        typeSelect.value = 'Other';
+        typeWrapper.style.display = 'block';
+        <?php endif; ?>
+    }
+    
+    // State to LGA dropdown
+    const stateSelect = document.getElementById('state_id');
+    const lgaSelect = document.getElementById('lga_id');
+    
+    if (stateSelect) {
+        debug('State select found');
+        
+        stateSelect.addEventListener('change', function() {
+            const stateId = this.value;
+            debug('State selected:', stateId);
+            
+            if (!stateId) {
+                lgaSelect.innerHTML = '<option value="">Select State First</option>';
+                return;
+            }
+            
+            const apiUrl = baseUrl.replace(/\/$/, '') + '/api/get_lgas.php?state_id=' + stateId;
+            debug('Fetching LGAs from:', apiUrl);
+            
+            fetch(apiUrl)
+                .then(response => {
+                    debug('Response status:', response.status);
+                    if (!response.ok) {
+                        throw new Error('HTTP error! status: ' + response.status);
+                    }
+                    return response.json();
+                })
+                .then(data => {
+                    debug('Received data:', data);
+                    
+                    if (data.error) {
+                        debug('API Error:', data.error);
+                        lgaSelect.innerHTML = '<option value="">Error: ' + data.error + '</option>';
+                        return;
+                    }
+                    
+                    lgaSelect.innerHTML = '<option value="">Select LGA</option>';
+                    if (data && data.length > 0) {
+                        data.forEach(lga => {
+                            const option = document.createElement('option');
+                            option.value = lga.id;
+                            option.textContent = lga.lga_name;
+                            lgaSelect.appendChild(option);
+                        });
+                        debug('Added ' + data.length + ' LGAs');
+                        
+                        <?php if (!empty($old['lga_id'])): ?>
+                        lgaSelect.value = '<?php echo $old['lga_id']; ?>';
+                        <?php endif; ?>
+                    } else {
+                        lgaSelect.innerHTML = '<option value="">No LGAs found</option>';
+                        debug('No LGAs found');
+                    }
+                })
+                .catch(error => {
+                    console.error('Fetch Error:', error);
+                    debug('Fetch Error:', error.message);
+                    lgaSelect.innerHTML = '<option value="">Error loading LGAs: ' + error.message + '</option>';
+                });
+        });
+        
+        <?php if (!empty($old['state_id'])): ?>
+        stateSelect.value = '<?php echo $old['state_id']; ?>';
+        stateSelect.dispatchEvent(new Event('change'));
+        <?php endif; ?>
+    } else {
+        debug('State select NOT found');
+    }
+    
+    // Zone to Command dropdown
+    const zoneSelect = document.getElementById('zone_id');
+    const commandSelect = document.getElementById('command_id');
+    
+    if (zoneSelect) {
+        debug('Zone select found');
+        
+        zoneSelect.addEventListener('change', function() {
+            const zoneId = this.value;
+            debug('Zone selected:', zoneId);
+            
+            if (!zoneId) {
+                commandSelect.innerHTML = '<option value="">Select Zone First</option>';
+                return;
+            }
+            
+            const apiUrl = baseUrl.replace(/\/$/, '') + '/api/get_commands.php?zone_id=' + zoneId;
+            debug('Fetching commands from:', apiUrl);
+            
+            fetch(apiUrl)
+                .then(response => {
+                    debug('Response status:', response.status);
+                    if (!response.ok) {
+                        throw new Error('HTTP error! status: ' + response.status);
+                    }
+                    return response.json();
+                })
+                .then(data => {
+                    debug('Received data:', data);
+                    
+                    if (data.error) {
+                        debug('API Error:', data.error);
+                        commandSelect.innerHTML = '<option value="">Error: ' + data.error + '</option>';
+                        return;
+                    }
+                    
+                    commandSelect.innerHTML = '<option value="">Select Command</option>';
+                    if (data && data.length > 0) {
+                        data.forEach(cmd => {
+                            const option = document.createElement('option');
+                            option.value = cmd.id;
+                            option.textContent = cmd.command_name;
+                            commandSelect.appendChild(option);
+                        });
+                        debug('Added ' + data.length + ' commands');
+                        
+                        <?php if (!empty($old['command_id'])): ?>
+                        commandSelect.value = '<?php echo $old['command_id']; ?>';
+                        <?php endif; ?>
+                    } else {
+                        commandSelect.innerHTML = '<option value="">No commands found</option>';
+                        debug('No commands found');
+                    }
+                })
+                .catch(error => {
+                    console.error('Fetch Error:', error);
+                    debug('Fetch Error:', error.message);
+                    commandSelect.innerHTML = '<option value="">Error loading commands: ' + error.message + '</option>';
+                });
+        });
+        
+        <?php if (!empty($old['zone_id'])): ?>
+        zoneSelect.value = '<?php echo $old['zone_id']; ?>';
+        zoneSelect.dispatchEvent(new Event('change'));
+        <?php endif; ?>
+    } else {
+        debug('Zone select NOT found');
+    }
+    
+    // Add Document button click handler
+    document.getElementById('addDocumentBtn').addEventListener('click', function() {
+        addDocumentRow();
+    });
+});
+
+function addDocumentRow() {
+    const container = document.getElementById('documentTypesContainer');
+    const rowId = 'doc_row_' + documentCount;
+    
+    const row = document.createElement('div');
+    row.className = 'document-row';
+    row.id = rowId;
+    
+    // Create dropdown options
+    let options = '<option value="">Select Document Type</option>';
+    for (const [value, label] of Object.entries(documentTypes)) {
+        options += `<option value="${value}">${label}</option>`;
+    }
+    
+    row.innerHTML = `
+        <select name="document_types[]" class="document-type-select">
+            ${options}
+        </select>
+        <div class="file-input-wrapper">
+            <div class="file-input-custom" id="custom_${rowId}">
+                <i class="fas fa-cloud-upload-alt"></i>
+                <span>Choose file...</span>
+            </div>
+            <input type="file" name="documents[]" class="file-input-element" 
+                   accept=".pdf,.jpg,.jpeg,.png,.doc,.docx" 
+                   data-custom="custom_${rowId}"
+                   onchange="updateFileLabel(this, '${rowId}')">
+        </div>
+        <button type="button" class="remove-document-btn" onclick="removeDocumentRow('${rowId}')" ${documentCount === 0 ? 'disabled' : ''}>
+            <i class="fas fa-times"></i>
+        </button>
+    `;
+    
+    container.appendChild(row);
+    documentCount++;
+}
+
+function updateFileLabel(input, rowId) {
+    const customDiv = document.getElementById('custom_' + rowId);
+    if (customDiv) {
+        if (input.files && input.files[0]) {
+            const file = input.files[0];
+            const fileSizeMB = (file.size / 1024 / 1024).toFixed(2);
+            
+            // Check file size (5MB max)
+            if (file.size > 5 * 1024 * 1024) {
+                alert('File ' + file.name + ' exceeds 5MB limit. Please choose a smaller file.');
+                input.value = '';
+                customDiv.innerHTML = '<i class="fas fa-cloud-upload-alt"></i><span>Choose file...</span>';
+                customDiv.style.borderColor = '#D7E3DC';
+                customDiv.style.background = '#f8fafc';
+                return;
+            }
+            
+            // Check file type
+            const allowedTypes = ['pdf', 'jpg', 'jpeg', 'png', 'doc', 'docx'];
+            const fileExt = file.name.split('.').pop().toLowerCase();
+            
+            if (!allowedTypes.includes(fileExt)) {
+                alert('File type not allowed. Allowed types: PDF, JPG, PNG, DOC, DOCX');
+                input.value = '';
+                customDiv.innerHTML = '<i class="fas fa-cloud-upload-alt"></i><span>Choose file...</span>';
+                customDiv.style.borderColor = '#D7E3DC';
+                customDiv.style.background = '#f8fafc';
+                return;
+            }
+            
+            customDiv.innerHTML = `<i class="fas fa-check-circle text-success"></i><span>${file.name} (${fileSizeMB} MB)</span>`;
+            customDiv.style.borderColor = '#207027';
+            customDiv.style.background = '#f0f9f4';
+        } else {
+            customDiv.innerHTML = '<i class="fas fa-cloud-upload-alt"></i><span>Choose file...</span>';
+            customDiv.style.borderColor = '#D7E3DC';
+            customDiv.style.background = '#f8fafc';
+        }
+    }
+}
+
+function removeDocumentRow(rowId) {
+    const row = document.getElementById(rowId);
+    if (row && documentCount > 1) {
+        row.remove();
+        documentCount--;
+    } else if (documentCount === 1) {
+        alert('At least one document row must remain. You can leave it empty if you don\'t want to upload any documents.');
+    }
+}
+
+function getFileIcon(mimeType) {
+    if (mimeType.includes('pdf')) return 'fa-file-pdf';
+    if (mimeType.includes('image')) return 'fa-file-image';
+    if (mimeType.includes('word')) return 'fa-file-word';
+    if (mimeType.includes('excel')) return 'fa-file-excel';
+    return 'fa-file';
+}
+
+function resetForm(formId) {
+    if (confirm('Are you sure you want to reset the form? All unsaved data will be lost.')) {
+        document.getElementById(formId).reset();
+        
+        // Reset document rows to just one empty row
+        const container = document.getElementById('documentTypesContainer');
+        container.innerHTML = '';
+        documentCount = 0;
+        addDocumentRow();
+        
+        // Reset dropdowns
+        document.getElementById('lga_id').innerHTML = '<option value="">Select State First</option>';
+        document.getElementById('command_id').innerHTML = '<option value="">Select Zone First</option>';
+        
+        // Hide other wrapper
+        const typeWrapper = document.getElementById('typeOtherWrapper');
+        if (typeWrapper) {
+            typeWrapper.style.display = 'none';
+        }
+        
+        if (typeof showNotification === 'function') {
+            showNotification('info', 'Form has been reset');
+        } else {
+            alert('Form has been reset');
+        }
+    }
+}
+</script>
+
+<?php require_once __DIR__ . '/../layouts/footer.php'; ?>

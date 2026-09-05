@@ -1,0 +1,32 @@
+# Environment / secrets — NEVER commit real credentials
+.env
+.env.local
+.env.production
+!.env.example
+
+# Runtime logs
+logs/*.log
+logs/*.txt
+
+# Composer-installed dependencies
+/vendor/
+composer.phar
+
+# User-uploaded content
+assets/uploads/*
+!assets/uploads/.gitkeep
+!assets/uploads/**/.htaccess
+
+# Generated database backups / dumps
+assets/backups/*
+!assets/backups/.gitkeep
+backups/
+*.sql.gz
+
+# OS / editor cruft
+.DS_Store
+Thumbs.db
+*.swp
+*~
+.idea/
+.vscode/

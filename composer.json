@@ -1,0 +1,52 @@
+{
+    "name": "nis/asset-management",
+    "description": "Nigeria Immigration Service Asset Management System",
+    "type": "project",
+    "require": {
+        "php": ">=7.4",
+        "phpmailer/phpmailer": "^6.8",
+        "monolog/monolog": "^2.0",
+        "vlucas/phpdotenv": "^5.5",
+        "tecnickcom/tcpdf": "^6.6",
+        "phpoffice/phpspreadsheet": "^1.29"
+    },
+    "require-dev": {
+        "phpunit/phpunit": "^9.5"
+    },
+    "autoload": {
+        "psr-4": {
+            "NIS\\": "src/"
+        },
+        "files": [
+            "core/Controller.php",
+            "core/Model.php",
+            "core/View.php",
+            "core/Database.php",
+            "core/Auth.php",
+            "core/Session.php",
+            "core/Security.php",
+            "core/AuditLogger.php",
+            "core/Uploader.php",
+            "core/Validator.php",
+            "core/Router.php",
+            "core/Middleware.php"
+        ]
+    },
+    "authors": [
+        {
+            "name": "NIS Web Team",
+            "email": "webteam@immigration.gov.ng"
+        }
+    ],
+    "config": {
+        "optimize-autoloader": true,
+        "preferred-install": "dist",
+        "sort-packages": true,
+        "platform-check": false,
+        "platform": {
+            "php": "7.4.0"
+        }
+    },
+    "minimum-stability": "stable",
+    "prefer-stable": true
+}

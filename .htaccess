@@ -1,0 +1,94 @@
+# ==========================================================================
+#  NIS Asset Management System — front-controller + hardening
+# ==========================================================================
+
+# --- Block hidden files (.env, .git, ...) --------------------------------
+<FilesMatch "^\.">
+    <IfModule mod_authz_core.c>
+        Require all denied
+    </IfModule>
+    <IfModule !mod_authz_core.c>
+        Order allow,deny
+        Deny from all
+    </IfModule>
+</FilesMatch>
+
+# --- Block dev / deployment / dump artefacts ----------------------------
+#     (serve_document.php is intentionally NOT blocked — it is a hardened,
+#      auth-enforcing endpoint reached via assets/uploads/.htaccess.)
+<FilesMatch "(^composer\.(json|lock)$|\.(sh|bat|sql|gz|md|yml|yaml|lock|dist|example|log)$|^(setup_check|test_[A-Za-z0-9_-]*|phpinfo)\.php$)">
+    <IfModule mod_authz_core.c>
+        Require all denied
+    </IfModule>
+    <IfModule !mod_authz_core.c>
+        Order allow,deny
+        Deny from all
+    </IfModule>
+</FilesMatch>
+
+# --- No directory listings --------------------------------------------
+Options -Indexes +FollowSymLinks
+
+# --- Disable dangerous methods ---------------------------------------
+<IfModule mod_rewrite.c>
+    RewriteEngine On
+
+    RewriteCond %{REQUEST_METHOD} ^(TRACE|TRACK|CONNECT)$
+    RewriteRule .* - [F]
+
+    # Block direct access to internal directories
+    RewriteRule ^(config|core|controllers|models|scripts|database|db|logs|vendor|tests)/ - [F,L]
+
+    # Front controller: anything that is not a real file/dir -> index.php
+    RewriteCond %{REQUEST_FILENAME} !-f
+    RewriteCond %{REQUEST_FILENAME} !-d
+    RewriteRule ^(.*)$ index.php [L,QSA]
+</IfModule>
+
+
+# --- Enable Gzip Compression -------------------------------------------
+<IfModule mod_deflate.c>
+    AddOutputFilterByType DEFLATE text/html text/plain text/xml text/css application/javascript application/json image/svg+xml
+</IfModule>
+
+# --- Enable Browser Asset Caching -------------------------------------
+<IfModule mod_expires.c>
+    ExpiresActive On
+    ExpiresByType image/jpg "access plus 1 month"
+    ExpiresByType image/jpeg "access plus 1 month"
+    ExpiresByType image/gif "access plus 1 month"
+    ExpiresByType image/png "access plus 1 month"
+    ExpiresByType image/svg+xml "access plus 1 month"
+    ExpiresByType text/css "access plus 1 week"
+    ExpiresByType application/javascript "access plus 1 week"
+    ExpiresByType font/woff2 "access plus 1 year"
+</IfModule>
+
+# --- Security response headers --------------------------------------
+<IfModule mod_headers.c>
+    Header always set X-Content-Type-Options "nosniff"
+    Header always set X-Frame-Options "DENY"
+    Header always set Referrer-Policy "strict-origin-when-cross-origin"
+    Header always set Cross-Origin-Opener-Policy "same-origin"
+    Header always set Permissions-Policy "geolocation=(self), microphone=(), camera=(self), payment=()"
+    # Content-Security-Policy is intentionally NOT set here. It is emitted once,
+    # from Middleware::sendSecurityHeaders(), which runs on every PHP request.
+    # Apache's "Header always set" does not replace a header the app already
+    # sent — it adds a second one — so defining CSP in both places means the
+    # browser enforces the *intersection* of two independently-maintained
+    # policies. That silently broke the dashboard's GIS map (this looser
+    # policy's "img-src https:" never actually applied; Middleware's stricter
+    # "img-src 'self' data: https://api.qrserver.com" always won and blocked
+    # the OpenStreetMap tile hosts, since the two are enforced together).
+    # Keep CSP maintained in exactly one place: core/Middleware.php.
+    # HSTS is emitted only for HTTPS requests (see below)
+    Header always set Strict-Transport-Security "max-age=31536000; includeSubDomains" "expr=%{HTTPS} == 'on'"
+    Header unset X-Powered-By
+    Header always unset X-Powered-By
+</IfModule>
+
+# --- Force HTTPS in production (comment out for local HTTP dev) --------
+# <IfModule mod_rewrite.c>
+#     RewriteCond %{HTTPS} off
+#     RewriteRule ^ https://%{HTTP_HOST}%{REQUEST_URI} [R=301,L]
+# </IfModule>

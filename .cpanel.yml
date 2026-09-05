@@ -1,0 +1,24 @@
+---
+deployment:
+  tasks:
+    - export DEPLOYPATH=/home/stbenedi/public_html/niscoreapps.com.ng/nis_ams
+
+    # Application code
+    - /bin/cp -R api        $DEPLOYPATH
+    - /bin/cp -R assets     $DEPLOYPATH
+    - /bin/cp -R auth       $DEPLOYPATH
+    - /bin/cp -R config     $DEPLOYPATH
+    - /bin/cp -R controllers $DEPLOYPATH
+    - /bin/cp -R core       $DEPLOYPATH
+    - /bin/cp -R models     $DEPLOYPATH
+    - /bin/cp -R views      $DEPLOYPATH
+    - /bin/cp -R vendor     $DEPLOYPATH
+
+    - /bin/cp index.php dashboard.php logout.php login_process.php serve_document.php $DEPLOYPATH
+    - /bin/cp .htaccess $DEPLOYPATH
+
+    # NOTE: .env, .git, logs/, assets/uploads/ and assets/backups/ are
+    # intentionally NOT deployed here. Manage secrets and runtime data
+    # directly on the server so they are never overwritten by a deploy.
+    - /bin/mkdir -p $DEPLOYPATH/logs $DEPLOYPATH/assets/uploads $DEPLOYPATH/assets/backups
+    - /bin/chmod 750 $DEPLOYPATH/logs $DEPLOYPATH/assets/uploads $DEPLOYPATH/assets/backups
