@@ -1770,3 +1770,264 @@ header {
 }
 
 
+
+
+/* ==========================================================================
+   MOBILE / NATIVE-APP EXPERIENCE  (merged in from the old mobile.css so it
+   lives in the one stylesheet the whole app reliably loads)
+   --------------------------------------------------------------------------
+   Every rule below is inside a `@media (max-width: …)` query, so it only
+   affects phones/tablets — desktop/laptop rendering is unchanged. Presentation
+   only: no markup, controllers, models, routes or JS behaviour is touched.
+   ========================================================================== */
+
+
+/* ---- 1. TABLET + PHONE (<= 991px): the width where the sidebar is a drawer */
+@media (max-width: 991px) {
+
+    html {
+        -webkit-text-size-adjust: 100%;
+        text-size-adjust: 100%;
+    }
+    body {
+        -webkit-tap-highlight-color: transparent;
+        overscroll-behavior-y: contain;
+    }
+
+    .main-content {
+        -webkit-overflow-scrolling: touch;
+        padding-bottom: calc(24px + env(safe-area-inset-bottom, 0px)) !important;
+    }
+
+    /* App-style slide-in drawer */
+    .sidebar {
+        width: 84% !important;
+        max-width: 320px !important;
+        box-shadow: 0 0 40px rgba(0, 0, 0, 0.35) !important;
+        border-top-right-radius: 18px;
+        border-bottom-right-radius: 18px;
+        padding-bottom: calc(16px + env(safe-area-inset-bottom, 0px));
+    }
+    .sidebar-overlay {
+        background: rgba(0, 0, 0, 0.45) !important;
+        -webkit-backdrop-filter: blur(2px);
+        backdrop-filter: blur(2px);
+    }
+
+    /* Thumb-sized drawer targets */
+    .sidebar-menu .menu-item {
+        min-height: 48px;
+        padding: 12px 16px !important;
+        font-size: 0.95rem !important;
+    }
+    .sidebar-menu .sub-item {
+        min-height: 44px;
+        padding: 11px 16px 11px 22px !important;
+        font-size: 0.9rem !important;
+    }
+    .sidebar-menu .menu-item i {
+        font-size: 1.05rem !important;
+    }
+
+    .mobile-menu-toggle {
+        width: 40px !important;
+        height: 40px !important;
+        border-radius: 10px !important;
+    }
+
+    img, video, canvas, iframe {
+        max-width: 100% !important;
+    }
+}
+
+
+/* ---- 2. PHONES (<= 768px): the real "mobile app" layer -------------------- */
+@media (max-width: 768px) {
+
+    body {
+        font-size: 13px;
+    }
+
+    .main-content {
+        padding-left: 12px !important;
+        padding-right: 12px !important;
+    }
+
+    /* Rounded, full-width cards */
+    .stat-card,
+    .dash-card,
+    .dashboard-panel,
+    .card,
+    .form-section,
+    .filter-section,
+    .content-card,
+    .info-card,
+    .detail-card {
+        border-radius: 14px !important;
+        max-width: 100% !important;
+    }
+    .stat-card:active,
+    .action-card:active,
+    .dash-card:active {
+        transform: scale(0.99);
+    }
+
+    /* 16px inputs stop iOS zoom on focus */
+    input:not([type="checkbox"]):not([type="radio"]):not([type="range"]),
+    select,
+    textarea,
+    .form-control {
+        font-size: 16px !important;
+        min-height: 44px;
+        border-radius: 10px !important;
+    }
+    textarea {
+        min-height: 90px;
+    }
+
+    /* Stack field groups full width */
+    .form-row,
+    .form-grid,
+    .filter-grid,
+    .field-group.two-col {
+        grid-template-columns: 1fr !important;
+        display: block;
+    }
+    .form-group,
+    .form-field {
+        width: 100% !important;
+    }
+
+    /* Thumb-friendly buttons */
+    .btn {
+        min-height: 44px;
+        border-radius: 10px !important;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+    }
+    .btn:active {
+        transform: scale(0.98);
+    }
+    .form-actions .btn,
+    .form-buttons .btn,
+    .modal-footer .btn,
+    .header-actions .btn,
+    .btn-block {
+        flex: 1 1 100% !important;
+        width: 100% !important;
+    }
+    .form-actions,
+    .form-buttons {
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+    }
+    .btn-icon {
+        flex: 0 0 auto !important;
+        width: 40px !important;
+        min-width: 40px;
+        padding: 0 !important;
+    }
+
+    /* Data tables swipe horizontally inside a rounded card */
+    .asset-table,
+    .report-table,
+    .pro-table,
+    .items-table,
+    .audit-table,
+    .diff-table,
+    .summary-table,
+    .approval-queue-table,
+    table.table {
+        display: block;
+        width: 100%;
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+        white-space: nowrap;
+        border-radius: 12px;
+    }
+    .table-responsive {
+        border-radius: 12px;
+        -webkit-overflow-scrolling: touch;
+    }
+    .asset-table th, .asset-table td,
+    .report-table th, .report-table td {
+        white-space: nowrap;
+    }
+
+    canvas {
+        max-width: 100% !important;
+        height: auto !important;
+    }
+
+    /* Dialogs / modals */
+    .modal-content,
+    .modal-box,
+    .scan-modal,
+    .modal-dialog {
+        width: 100% !important;
+        max-width: 94vw !important;
+        max-height: 88vh !important;
+        overflow-y: auto;
+        -webkit-overflow-scrolling: touch;
+        border-radius: 16px !important;
+        margin: auto !important;
+    }
+    .modal-content.modal-lg {
+        max-width: 94vw !important;
+    }
+
+    /* Full-width top toasts */
+    .notification-container {
+        top: calc(66px + env(safe-area-inset-top, 0px)) !important;
+        left: 10px !important;
+        right: 10px !important;
+        max-width: none !important;
+    }
+
+    .page-header,
+    .content-wrapper,
+    .dashboard-grid,
+    .stats-grid {
+        max-width: 100% !important;
+    }
+}
+
+
+/* ---- 3. SMALL PHONES (<= 480px) ------------------------------------------- */
+@media (max-width: 480px) {
+
+    .main-content {
+        padding-left: 10px !important;
+        padding-right: 10px !important;
+    }
+    .stat-card,
+    .dashboard-panel,
+    .dash-card {
+        padding: 14px !important;
+    }
+    .page-header h1,
+    .header-content h1 {
+        font-size: 1.1rem !important;
+    }
+    .action-grid {
+        grid-template-columns: 1fr !important;
+    }
+    .sidebar {
+        width: 88% !important;
+    }
+}
+
+
+/* ---- 4. LANDSCAPE PHONES: let short viewports scroll fully ----------------- */
+@media (max-width: 932px) and (max-height: 500px) and (orientation: landscape) {
+    .sidebar {
+        overflow-y: auto;
+    }
+    .modal-content,
+    .modal-box,
+    .scan-modal {
+        max-height: 94vh !important;
+    }
+}
